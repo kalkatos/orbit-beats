@@ -10,6 +10,8 @@ namespace Kalkatos.Cycles
 	public class PointDetector : MonoBehaviour
 	{
 		public static Action<Vector2> OnMouseClick;
+		public static Action OnF1;
+		public static Action OnEsc;
 
 		void OnGUI ()
 		{
@@ -21,6 +23,13 @@ namespace Kalkatos.Cycles
 			else if (e.type == EventType.MouseDown)
 			{
 				OnMouseClick?.Invoke(e.mousePosition);
+			}
+			else if (e.type == EventType.KeyDown)
+			{
+				if (e.keyCode == KeyCode.F1)
+					OnF1?.Invoke();
+				if (e.keyCode == KeyCode.Escape)
+					OnEsc?.Invoke();
 			}
 		}
 	}

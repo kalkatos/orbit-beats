@@ -126,5 +126,5 @@ MonoBehaviour:
   originalEmissionIntensity: 3
   pulseEmissionIntensity: 4
   originalColor: {r: 1, g: 1, b: 1, a: 1}
-  successColor: {r: 0.09000003, g: 1, b: 0, a: 1}
-  failColor: {r: 1, g: 0, b: 0, a: 1}
+  successColor: {r: 0.39489463, g: 1, b: 0.33490568, a: 1}
+  failColor: {r: 1, g: 0.3537736, b: 0.3537736, a: 1}

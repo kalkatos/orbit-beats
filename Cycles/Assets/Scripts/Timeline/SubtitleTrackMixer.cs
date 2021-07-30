@@ -15,21 +15,17 @@ public class SubtitleTrackMixer : PlayableBehaviour
 		if (!text)
 			return;
 
-		//int inputCount = playable.GetInputCount();
-		//for (int i = 0; i < inputCount; i++)
-		//{
-		//	float inputWeight = playable.GetInputWeight(i);
-		//	if (inputWeight > 0f)
-		//	{
-		//		ScriptPlayable<SubtitleBehaviour> inputPlayable = (ScriptPlayable<SubtitleBehaviour>)playable.GetInput(i);
-		//		SubtitleBehaviour input = inputPlayable.GetBehaviour();
-		//		currentText = input.subtitleText;
-		//		currentAlpha = inputWeight;
-		//	}
-		//}
-		if (info.weight > 0)
+		int inputCount = playable.GetInputCount();
+		for (int i = 0; i < inputCount; i++)
 		{
-			
+			float inputWeight = playable.GetInputWeight(i);
+			if (inputWeight > 0f)
+			{
+				ScriptPlayable<SubtitleBehaviour> inputPlayable = (ScriptPlayable<SubtitleBehaviour>)playable.GetInput(i);
+				SubtitleBehaviour input = inputPlayable.GetBehaviour();
+				currentText = input.subtitleText;
+				currentAlpha = inputWeight;
+			}
 		}
 
 		text.text = currentText;

@@ -34,12 +34,14 @@ namespace Kalkatos.Cycles
 
 		private float startTime;
 		private Material myMaterial;
+		private Collider2D myCollider;
 
 		#endregion
 
 		private void Awake ()
 		{
 			myMaterial = myRenderer.material;
+			myCollider = GetComponent<Collider2D>();
 			ResetColors();
 		}
 
@@ -49,6 +51,7 @@ namespace Kalkatos.Cycles
 			transform.DOScale(TargetRadius, MaxTime).OnComplete(GrowEnded).SetEase(Ease.Linear);
 			startTime = Time.time;
 			OnCircleStarted?.Invoke();
+			myCollider.enabled = true;
 		}
 
 		private void ResetColors ()
@@ -80,6 +83,7 @@ namespace Kalkatos.Cycles
 
 		public void Deactivate (bool success)
 		{
+			myCollider.enabled = false;
 			DOTween.Pause(transform);
 			Color color = success ? successColor : failColor;
 			myMaterial.DOColor(color, 0.25f);
@@ -95,12 +99,5 @@ namespace Kalkatos.Cycles
 			});
 			sequence1.Play();
 		}
-	}
-
-	public enum CircleDefinitionNames
-	{
-		Undefined,
-		GrowingCircle,
-		ClickEffect
 	}
 }

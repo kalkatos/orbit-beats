@@ -46,9 +46,9 @@ MonoBehaviour:
   objects:
   - id: 1
     go: {fileID: 4581029342304540716, guid: 1a91801477d9b83478abbba3ef778614, type: 3}
-    qty: 10
+    qty: 25
     instantiations: 0
   - id: 2
-    go: {fileID: 7531030194792073114, guid: 7948afaa14125ba4f86f2bd4180e29be, type: 3}
-    qty: 10
+    go: {fileID: 7149663768523600971, guid: 8716e299623ce9943ae4b5f1764aeefe, type: 3}
+    qty: 25
     instantiations: 0

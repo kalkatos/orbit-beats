@@ -36,6 +36,14 @@ namespace Kalkatos.Cycles
 		{
 			circleViewMarker = (CircleSpawnMarker)target;
 			gameResolution = new Vector2(1200, 800);
+			PointDetector.OnF1 += OnF1;
+			PointDetector.OnEsc += OnEsc;
+		}
+
+		private void OnDisable ()
+		{
+			PointDetector.OnF1 -= OnF1;
+			PointDetector.OnEsc -= OnEsc;
 		}
 
 		public override void OnInspectorGUI ()
@@ -44,26 +52,47 @@ namespace Kalkatos.Cycles
 			GUILayout.Space(15);
 			gameResolution = EditorGUILayout.Vector2Field("Game resolution", gameResolution);
 			GUILayout.Space(5);
+			Event e = Event.current;
 			if (!isGettingScreenPoint)
 			{
-				if (GUILayout.Button("Get Point on Game View"))
-				{
-					PointDetector.OnMouseClick += MouseClickOnGameView;
-					isGettingScreenPoint = true;
-				}
+				if (GUILayout.Button("Get Point on Game View") || (e.type == EventType.KeyDown && e.keyCode == KeyCode.F1))
+					StartGettingClicks();
 			}
 			else
 				EditorGUILayout.LabelField("Getting point on Game View", EditorStyles.boldLabel);
 		}
 
-		private void MouseClickOnGameView (Vector2 point)
+		private void StartGettingClicks ()
+		{
+			PointDetector.OnMouseClick += MouseClickOnGameView;
+			isGettingScreenPoint = true;
+		}
+
+		private void StopGettingClicks ()
 		{
 			PointDetector.OnMouseClick -= MouseClickOnGameView;
+			isGettingScreenPoint = false;
+		}
+
+		private void MouseClickOnGameView (Vector2 point)
+		{
+			StopGettingClicks();
 			circleViewMarker.Position.x = point.x / gameResolution.x;
 			circleViewMarker.Position.y = (gameResolution.y - point.y) / gameResolution.y;
-			isGettingScreenPoint = false;
 			Repaint();
 			EditorUtility.SetDirty(target); 
+		}
+
+		private void OnF1 ()
+		{
+			if (!isGettingScreenPoint)
+				StartGettingClicks();
+		}
+
+		private void OnEsc ()
+		{
+			if (isGettingScreenPoint)
+				StopGettingClicks();
 		}
 	}
 #endif

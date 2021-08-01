@@ -9,12 +9,7 @@ namespace Kalkatos.Cycles
 
 		public override Playable CreatePlayable (PlayableGraph graph, GameObject owner)
 		{
-			var playable = ScriptPlayable<CircleSpawnBehaviour>.Create(graph);
-
-			CircleSpawnBehaviour circleSpawnBehaviour = playable.GetBehaviour();
-			circleSpawnBehaviour.scoringPerCircle = scoringPerCircle;
-
-			return playable;
+			return ScriptPlayable<CircleSpawnBehaviour>.Create(graph);
 		}
 	}
 }

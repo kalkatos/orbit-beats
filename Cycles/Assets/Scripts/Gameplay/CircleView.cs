@@ -5,99 +5,142 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using DG.Tweening;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace Kalkatos.Cycles
 {
-	public class CircleView : MonoBehaviour, IPointerClickHandler
+	public class CircleView : MonoBehaviour
 	{
-		public static Action OnCircleStarted;
-		public static Action<float> OnCircleCompleted; //float score
+		public static Action<float> OnScored; //float score
 
-		#region Fields
+		[Header("Circle Definition")]
+		public float TimeToActivate = 1f;
+		public float TimeActive = 0.5f;
+		public float Size = 1f;
 
-		public float MaxTime = 3f;
-		public float TargetRadius = 1f;
-		public float SpeedWeight = 1f;
-		public float AccuracyWeight = 1f;
-		public bool TurnOffWhenEnded = true;
-		public UnityEvent OnGrowFinishedEvent;
-		public UnityEvent OnClickedEvent;
+		private const string emissionColor = "_EmissionColor";
 
-		[SerializeField] private Renderer myRenderer;
+		[Header("Configuration")]
+		[SerializeField] private float tolerance;
+		[SerializeField] private float finishingFadeTime;
+		[SerializeField] private float scoreDecay;
+		[SerializeField] private Image thinCircle;
+		[SerializeField] private Image thickCircle;
 		[SerializeField] private float originalEmissionIntensity;
 		[SerializeField] private float pulseEmissionIntensity;
 		[SerializeField] private Color originalColor;
 		[SerializeField] private Color successColor;
 		[SerializeField] private Color failColor;
 
-		private const string emissionColor = "_EmissionColor";
-
+		private Material thickMaterial;
+		private int activationState;
+		private float activeStartTime;
 		private float startTime;
-		private Material myMaterial;
-		private Collider2D myCollider;
-
-		#endregion
+		private bool fading;
 
 		private void Awake ()
 		{
-			myMaterial = myRenderer.material;
-			myCollider = GetComponent<Collider2D>();
-			ResetColors();
+			thickMaterial = new Material(thickCircle.material);
+			thickCircle.material = thickMaterial;
 		}
 
 		private void OnEnable ()
 		{
-			transform.localScale = Vector3.one * 0.1f;
-			transform.DOScale(TargetRadius, MaxTime).OnComplete(GrowEnded).SetEase(Ease.Linear);
+			transform.localScale = Vector3.one * Size;
+			activationState = 0;
+			ResetColors();
+			thinCircle.raycastTarget = true;
+			fading = false;
+			thickCircle.fillAmount = 0f;
+			int instanceId = gameObject.GetInstanceID();
+			thinCircle.DOColor(originalColor, TimeToActivate).SetId(instanceId);
+			thickCircle.DOColor(originalColor, TimeToActivate).SetId(instanceId);
+			thickCircle.DOFillAmount(1f, TimeToActivate).OnComplete(Activate).SetId(instanceId).SetEase(Ease.Linear);
 			startTime = Time.time;
-			OnCircleStarted?.Invoke();
-			myCollider.enabled = true;
 		}
 
 		private void ResetColors ()
 		{
-			myMaterial.color = originalColor;
-			myMaterial.SetVector(emissionColor, originalColor * originalEmissionIntensity);
+			Color fadedColor = originalColor;
+			fadedColor.a = 0;
+			thinCircle.color = fadedColor;
+			thickCircle.color = fadedColor;
+			thickMaterial.SetVector(emissionColor, originalColor * originalEmissionIntensity);
 		}
 
-		private void GrowEnded ()
+		private void Activate ()
 		{
-			OnCircleCompleted?.Invoke(0);
-			OnGrowFinishedEvent.Invoke();
-			if (TurnOffWhenEnded)
-				Deactivate(false);
+			activationState = 1;
+			activeStartTime = Time.time;
+			StartCoroutine(DoAfterTime(TimeActive, Finish));
 		}
 
-		public void OnPointerClick (PointerEventData eventData)
+		private void Finish ()
 		{
-			Vector3 clickPos = eventData.pointerCurrentRaycast.worldPosition;
-			Vector3 thisPos = transform.position;
-			clickPos.z = thisPos.z;
-			float accuracy = Mathf.Clamp(TargetRadius - Vector3.Distance(clickPos, thisPos), 0, TargetRadius) / TargetRadius;
-			float speed = (Time.time - startTime) / MaxTime;
-			float score = (accuracy * AccuracyWeight + speed * SpeedWeight) / (AccuracyWeight + SpeedWeight);
-			OnCircleCompleted?.Invoke(score);
-			OnClickedEvent.Invoke();
-			Deactivate(true);
+			activationState = 2;
+			Fade(true);
 		}
 
-		public void Deactivate (bool success)
+		private void Fade (bool hideThinCircle)
 		{
-			myCollider.enabled = false;
-			DOTween.Pause(transform);
-			Color color = success ? successColor : failColor;
-			myMaterial.DOColor(color, 0.25f);
-			transform.DOPunchScale(Vector3.one * 0.2f, 0.5f, 1, 1).SetRelative(true);
-			Sequence sequence1 = DOTween.Sequence();
-			sequence1.Append(DOTween.To(() => myMaterial.GetVector(emissionColor).w, (float x) => myMaterial.SetVector(emissionColor, color * x), pulseEmissionIntensity, 0.25f));
-			sequence1.Append(DOTween.To(() => myMaterial.GetVector(emissionColor).w, (float x) => myMaterial.SetVector(emissionColor, color * x), originalEmissionIntensity, 0.25f));
-			sequence1.OnComplete(() =>
+			fading = true;
+			if (hideThinCircle)
 			{
-				DOTween.Complete(transform, false);
-				ResetColors();
-				gameObject.SetActive(false);
-			});
-			sequence1.Play();
+				Color fadedColor = originalColor;
+				fadedColor.a = 0.01f;
+				thinCircle.color = fadedColor;
+			}
+			else
+				thinCircle.CrossFadeAlpha(0, finishingFadeTime, false);
+			thickCircle.CrossFadeAlpha(0, finishingFadeTime, false);
+			DOTween.To(() => thickMaterial.GetVector(emissionColor).w, (float x) => thickMaterial.SetVector(emissionColor, originalColor * x), 1f, finishingFadeTime).SetEase(Ease.InCubic);
+			StartCoroutine(DoAfterTime(finishingFadeTime, () => gameObject.SetActive(false)));
+		}
+
+		private IEnumerator DoAfterTime (float time, Action callback)
+		{
+			yield return new WaitForSeconds(time);
+			callback?.Invoke();
+		}
+
+		private void Misclick ()
+		{
+			thinCircle.raycastTarget = false;
+			thinCircle.color = failColor;
+			thickCircle.color = failColor;
+			Fade(false);
+			OnScored?.Invoke(0);
+		}
+
+		private void SuccessClick ()
+		{
+			thinCircle.raycastTarget = false;
+			thickCircle.fillAmount = 1f;
+			thickCircle.color = successColor;
+			float score;
+			if (activationState > 0)
+			{
+				if (activationState == 1)
+					thickMaterial.SetVector(emissionColor, originalColor * pulseEmissionIntensity);
+				score = Mathf.Clamp01(1 - ((Time.time - activeStartTime) / (TimeActive + finishingFadeTime)));
+			}
+			else
+				score = Mathf.Clamp01(1 - (TimeToActivate - (Time.time - startTime)) / tolerance);
+			score *= activationState != 1 ? scoreDecay : 1;
+			if (!fading)
+				Fade(true);
+			OnScored?.Invoke(score);
+
+			Debug.Log("Score: " + (score * 100).ToString("0.00"));
+		}
+
+		public void OnClick ()
+		{
+			DOTween.Kill(gameObject.GetInstanceID());
+			if (activationState > 0 || TimeToActivate - (Time.time - startTime) < tolerance)
+				SuccessClick();
+			else
+				Misclick();
 		}
 	}
 }

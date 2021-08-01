@@ -43,12 +43,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73f8a76e69747a346bbf8112c0378b89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvasObjectPool: {fileID: 0}
   objects:
-  - id: 1
-    go: {fileID: 4581029342304540716, guid: 1a91801477d9b83478abbba3ef778614, type: 3}
+  - id: 0
+    go: {fileID: 2338424560414820489, guid: df630a65dc1171344861b51e446311f7, type: 3}
     qty: 25
-    instantiations: 0
-  - id: 2
-    go: {fileID: 7149663768523600971, guid: 8716e299623ce9943ae4b5f1764aeefe, type: 3}
-    qty: 25
+    isCanvasObject: 1
     instantiations: 0

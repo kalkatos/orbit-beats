@@ -6,10 +6,10 @@ namespace Kalkatos.Cycles
 {
     public class CanvasManager : MonoBehaviour
     {
-		private void Awake ()
-		{
-			for (int i = 0; i < transform.childCount; i++)
-				transform.GetChild(i).gameObject.SetActive(true);
-		}
+		//private void Awake ()
+		//{
+		//	for (int i = 0; i < transform.childCount; i++)
+		//		transform.GetChild(i).gameObject.SetActive(true);
+		//}
 	}
 }

@@ -14,9 +14,11 @@ namespace Kalkatos.Cycles
 			public CircleDefinitionNames id;
 			public GameObject go;
 			public int qty;
+			public bool isCanvasObject;
 			[HideInInspector] public int instantiations;
 		}
 
+		[SerializeField] private RectTransform canvasObjectPool;
 		[SerializeField] private ObjectDefinition[] objects;
 
 		private Dictionary<string, List<GameObject>> pool = new Dictionary<string, List<GameObject>>();
@@ -40,9 +42,8 @@ namespace Kalkatos.Cycles
 				objects[i].go.SetActive(false);
 				for (int j = 0; j < objects[i].qty; j++)
 				{
-					GameObject newObj = Instantiate(objects[i].go, transform.position, Quaternion.identity);
+					GameObject newObj = Instantiate(objects[i].go, transform.position, Quaternion.identity, objects[i].isCanvasObject ? canvasObjectPool : transform);
 					newObj.name = objects[i].id.ToString();
-					newObj.transform.parent = transform;
 					if (!newObj.GetComponent<PoolObjectDeactivationCaller>())
 						newObj.AddComponent<PoolObjectDeactivationCaller>();
 					newObj.SetActive(false);
@@ -69,7 +70,10 @@ namespace Kalkatos.Cycles
 		private IEnumerator SetParentAfterMiliseconds (GameObject go)
 		{
 			yield return new WaitForSeconds(0.1f);
-			go.transform.SetParent(transform);
+			if (prefabs[go.name].isCanvasObject)
+				go.transform.SetParent(canvasObjectPool);
+			else
+				go.transform.SetParent(transform);
 		}
 
 		private static void PoolObject (GameObject go)

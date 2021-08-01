@@ -5,6 +5,7 @@ namespace Kalkatos.Cycles
 {
 	public class CircleSpawner : MonoBehaviour, INotificationReceiver
 	{
+		[SerializeField] private Canvas canvas;
 		[SerializeField] private float startingX = -100f;
 		[SerializeField] private float startingY = 0;
 		[SerializeField] private float startingZ = 100;
@@ -25,11 +26,9 @@ namespace Kalkatos.Cycles
 						startingX + minX + (maxX - minX) * marker.Position.x,
 						startingY + minY + (maxY - minY) * marker.Position.y,
 						startingZ), Quaternion.identity, false).GetComponent<CircleView>();
-					circleView.MaxTime = marker.MaxTime;
-					circleView.TargetRadius = marker.TargetRadius;
-					circleView.AccuracyWeight = marker.AccuracyWeight;
-					circleView.SpeedWeight = marker.SpeedWeight;
-					circleView.transform.SetParent(transform);
+					circleView.TimeToActivate = marker.TimeToActivate;
+					circleView.TimeActive = marker.TimeActive;
+					circleView.Size = marker.Size;
 					circleView.gameObject.SetActive(true);
 				}
 				else

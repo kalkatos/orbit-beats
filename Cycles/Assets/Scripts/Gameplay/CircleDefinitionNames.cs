@@ -2,8 +2,6 @@
 {
 	public enum CircleDefinitionNames
 	{
-		Undefined,
-		GrowingCircle,
-		GrowingCircleDummy,
+		CircleTimed,
 	}
 }

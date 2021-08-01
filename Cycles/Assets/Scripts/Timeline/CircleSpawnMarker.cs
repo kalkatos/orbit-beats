@@ -11,16 +11,15 @@ namespace Kalkatos.Cycles
 	{
 		public Vector2 Position;
 		public CircleDefinitionNames PrefabName;
-		public float MaxTime = 3f;
-		public float TargetRadius = 1f;
-		public float SpeedWeight = 1f;
-		public float AccuracyWeight = 1f;
+		public float TimeToActivate = 1f;
+		public float TimeActive = 0.5f;
+		public float Size = 1f;
 
 		public PropertyName id => $"{PrefabName}@{Position.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}";
 
 		public override string ToString ()
 		{
-			return $"Marker {id} (MaxTime: {MaxTime.ToString("0.0")}, TargetRadius: {TargetRadius.ToString("0.0")}, SpeedWeight: {SpeedWeight.ToString("0.0")}, AccuracyWeight: {AccuracyWeight.ToString("0.0")})";
+			return $"Marker {id} (TimeToActivate: {TimeToActivate.ToString("0.0")}, TimeActive: {TimeActive.ToString("0.0")}, Size: {Size.ToString("0.0")})";
 		}
 	}
 
@@ -28,30 +27,26 @@ namespace Kalkatos.Cycles
 	[CustomEditor(typeof(CircleSpawnMarker))]
 	public class CircleSpawnMarkerInspector : Editor
 	{
-		private bool isGettingScreenPoint;
-		private CircleSpawnMarker circleViewMarker;
-		private Vector2 gameResolution;
+		private static bool isGettingScreenPoint;
+		private static CircleSpawnMarker circleViewMarker;
+		private bool mustGetClicks;
 
 		private void OnEnable ()
 		{
+			PointDetector.OnMouseLeftClick += MouseClickOnGameView;
 			circleViewMarker = (CircleSpawnMarker)target;
-			gameResolution = new Vector2(1200, 800);
-			PointDetector.OnF1 += OnF1;
-			PointDetector.OnEsc += OnEsc;
 		}
 
 		private void OnDisable ()
 		{
-			PointDetector.OnF1 -= OnF1;
-			PointDetector.OnEsc -= OnEsc;
+			PointDetector.OnMouseLeftClick -= MouseClickOnGameView;
+			isGettingScreenPoint = false;
 		}
 
 		public override void OnInspectorGUI ()
 		{
 			base.OnInspectorGUI();
 			GUILayout.Space(15);
-			gameResolution = EditorGUILayout.Vector2Field("Game resolution", gameResolution);
-			GUILayout.Space(5);
 			Event e = Event.current;
 			if (!isGettingScreenPoint)
 			{
@@ -62,37 +57,44 @@ namespace Kalkatos.Cycles
 				EditorGUILayout.LabelField("Getting point on Game View", EditorStyles.boldLabel);
 		}
 
-		private void StartGettingClicks ()
-		{
-			PointDetector.OnMouseClick += MouseClickOnGameView;
-			isGettingScreenPoint = true;
-		}
-
-		private void StopGettingClicks ()
-		{
-			PointDetector.OnMouseClick -= MouseClickOnGameView;
-			isGettingScreenPoint = false;
-		}
-
 		private void MouseClickOnGameView (Vector2 point)
 		{
 			StopGettingClicks();
-			circleViewMarker.Position.x = point.x / gameResolution.x;
-			circleViewMarker.Position.y = (gameResolution.y - point.y) / gameResolution.y;
+			circleViewMarker.Position = GameVariables.GetScreenPercent(point);
 			Repaint();
 			EditorUtility.SetDirty(target); 
 		}
 
-		private void OnF1 ()
+		[MenuItem("My Commands/Start Getting Clicks _d")]
+		private static void StartGettingClicks ()
 		{
-			if (!isGettingScreenPoint)
-				StartGettingClicks();
+			isGettingScreenPoint = true;
+			Debug.Log("Started getting point from Game Screen");
 		}
 
-		private void OnEsc ()
+		[MenuItem("My Commands/Stop Getting Clicks _f")]
+		private static void StopGettingClicks ()
 		{
 			if (isGettingScreenPoint)
-				StopGettingClicks();
+				Debug.Log("Stopped getting point from Game Screen");
+			isGettingScreenPoint = false;
+		}
+
+		[MenuItem("My Commands/Copy Position To Clipboard _c")]
+		private static void CopyPositionToClipboard ()
+		{
+			string position = circleViewMarker.Position.x.ToString("0.0000") + "|";
+			position += circleViewMarker.Position.y.ToString("0.0000");
+			GUIUtility.systemCopyBuffer = position;
+			Debug.Log($"Position {position} copied to clipboard");
+		}
+
+		[MenuItem("My Commands/Paste Position From Clipboard _v")]
+		private static void PastePositionFromClipboard ()
+		{
+			string[] positions = GUIUtility.systemCopyBuffer.Split('|');
+			circleViewMarker.Position = new Vector2(float.Parse(positions[0]), float.Parse(positions[1]));
+			Debug.Log($"Position {GUIUtility.systemCopyBuffer} pasted from clipboard");
 		}
 	}
 #endif

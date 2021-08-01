@@ -1,17 +1,18 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace Kalkatos.Cycles
 {
-#if UNITY_EDITOR
 	[ExecuteInEditMode]
 	public class PointDetector : MonoBehaviour
 	{
 		public static Action<Vector2> OnMouseLeftClick;
 		public static Action<Vector2> OnMouseRightClick;
 
+#if UNITY_EDITOR
 		void OnGUI ()
 		{
 			Event e = Event.current;
@@ -38,6 +39,6 @@ namespace Kalkatos.Cycles
 			//	OnMouseClick?.Invoke(e.mousePosition);
 			//}
 		}
-	}
 #endif
+	}
 }

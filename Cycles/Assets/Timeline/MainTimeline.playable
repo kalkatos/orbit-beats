@@ -131,7 +131,6 @@ MonoBehaviour:
   m_Tracks:
   - {fileID: -6891506435886309852}
   - {fileID: 6843645930729174033}
-  - {fileID: 5698031941541713254}
   m_FixedDuration: 0
   m_EditorSettings:
     m_Framerate: 60
@@ -197,7 +196,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15c38f6fa1940124db1ab7f6fe7268d1, type: 3}
   m_Name: Signal Emitter
   m_EditorClassIdentifier: 
-  m_Time: 280.1
+  m_Time: 266.56666666666666
   m_Retroactive: 0
   m_EmitOnce: 0
   m_Asset: {fileID: 11400000, guid: a9c539cb54900af45a517def19a3837a, type: 2}

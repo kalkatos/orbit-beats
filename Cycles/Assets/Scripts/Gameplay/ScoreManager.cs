@@ -24,7 +24,7 @@ namespace Kalkatos.Cycles
 		{
 			Instance = this;
 			CircleView.OnScored += Scored;
-			GameManager.OnTimelineEnded += TimelineEnded;
+			LevelManager.OnTimelineEnded += TimelineEnded;
 		}
 
 		private void Start ()
@@ -39,7 +39,7 @@ namespace Kalkatos.Cycles
 		private void OnDestroy ()
 		{
 			CircleView.OnScored -= Scored;
-			GameManager.OnTimelineEnded -= TimelineEnded;
+			LevelManager.OnTimelineEnded -= TimelineEnded;
 		}
 
 		private void Scored (float score)

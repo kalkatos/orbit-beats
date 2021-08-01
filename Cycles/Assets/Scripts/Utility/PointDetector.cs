@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using System.Collections;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -12,8 +13,22 @@ namespace Kalkatos.Cycles
 		public static Action<Vector2> OnMouseLeftClick;
 		public static Action<Vector2> OnMouseRightClick;
 
+		public Camera canvasCamera;
+
 #if UNITY_EDITOR
-		void OnGUI ()
+		private CircleSpawnMarker selectedMarker;
+
+		private void Awake ()
+		{
+			CircleSpawnMarkerInspector.OnMarkerSelection += MarkerSelection;
+		}
+
+		private void OnDestroy ()
+		{
+			CircleSpawnMarkerInspector.OnMarkerSelection -= MarkerSelection;
+		}
+
+		private void OnGUI ()
 		{
 			Event e = Event.current;
 			switch (e.type)
@@ -38,6 +53,21 @@ namespace Kalkatos.Cycles
 			//{
 			//	OnMouseClick?.Invoke(e.mousePosition);
 			//}
+		}
+
+		private void OnDrawGizmos ()
+		{
+			if (selectedMarker)
+			{
+				Handles.color = Color.magenta;
+				Vector3 worldPoint = GameVariables.CoordToWorld(selectedMarker.Position);
+				Handles.DrawWireDisc(worldPoint, Vector3.back, 0.5f);
+			}
+		}
+
+		private void MarkerSelection (CircleSpawnMarker marker)
+		{
+			selectedMarker = marker;
 		}
 #endif
 	}

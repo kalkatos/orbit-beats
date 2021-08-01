@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
+using System.Collections;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -27,14 +29,16 @@ namespace Kalkatos.Cycles
 	[CustomEditor(typeof(CircleSpawnMarker))]
 	public class CircleSpawnMarkerInspector : Editor
 	{
+		public static Action<CircleSpawnMarker> OnMarkerSelection; 
+
 		private static bool isGettingScreenPoint;
 		private static CircleSpawnMarker circleViewMarker;
-		private bool mustGetClicks;
-
+		
 		private void OnEnable ()
 		{
 			PointDetector.OnMouseLeftClick += MouseClickOnGameView;
 			circleViewMarker = (CircleSpawnMarker)target;
+			OnMarkerSelection?.Invoke(circleViewMarker);
 		}
 
 		private void OnDisable ()
@@ -59,20 +63,23 @@ namespace Kalkatos.Cycles
 
 		private void MouseClickOnGameView (Vector2 point)
 		{
-			StopGettingClicks();
-			circleViewMarker.Position = GameVariables.GetScreenPercent(point);
-			Repaint();
-			EditorUtility.SetDirty(target); 
+			if (isGettingScreenPoint)
+			{
+				StopGettingClicks();
+				circleViewMarker.Position = GameVariables.GetScreenPercent(point);
+				Repaint();
+				EditorUtility.SetDirty(target);
+			}
 		}
 
-		[MenuItem("My Commands/Start Getting Clicks _d")]
+		[MenuItem("My Commands/Start Getting Clicks _g")]
 		private static void StartGettingClicks ()
 		{
 			isGettingScreenPoint = true;
 			Debug.Log("Started getting point from Game Screen");
 		}
 
-		[MenuItem("My Commands/Stop Getting Clicks _f")]
+		[MenuItem("My Commands/Stop Getting Clicks _b")]
 		private static void StopGettingClicks ()
 		{
 			if (isGettingScreenPoint)

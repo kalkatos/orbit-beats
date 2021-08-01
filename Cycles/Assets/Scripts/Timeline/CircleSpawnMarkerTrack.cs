@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Timeline;
 using UnityEngine.Playables;
-using System;
 
 namespace Kalkatos.Cycles
 {

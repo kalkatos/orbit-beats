@@ -1,10 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using DG.Tweening;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace Kalkatos.Cycles

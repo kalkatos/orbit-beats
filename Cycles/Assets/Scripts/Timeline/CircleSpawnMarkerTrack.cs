@@ -9,6 +9,7 @@ namespace Kalkatos.Cycles
 	public class CircleSpawnMarkerTrack : MarkerTrack
 	{
 		public bool isCreatingMarks;
+		public float retroactiveTimeForMark = 1f;
 
 		private void OnEnable ()
 		{
@@ -24,7 +25,7 @@ namespace Kalkatos.Cycles
 		{
 			if (!muted && isCreatingMarks)
 			{
-				CircleSpawnMarker newMarker = CreateMarker<CircleSpawnMarker>(time - 1);
+				CircleSpawnMarker newMarker = CreateMarker<CircleSpawnMarker>(time - retroactiveTimeForMark);
 				newMarker.Position = GameVariables.GetScreenPercent(position);
 			}
 		}

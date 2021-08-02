@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Kalkatos.Cycles
@@ -7,6 +8,8 @@ namespace Kalkatos.Cycles
     public class GameManager : MonoBehaviour
 	{
 		public static GameManager Instance;
+
+		public static int CurrentLevel;
 
 		private void Awake ()
 		{
@@ -17,11 +20,30 @@ namespace Kalkatos.Cycles
 				Destroy(gameObject);
 				return;
 			}
+
+			LevelManager.OnTimelineEnded += EndOfTimeline;
+		}
+
+		private void OnDestroy ()
+		{
+			LevelManager.OnTimelineEnded -= EndOfTimeline;
+		}
+
+		private void EndOfTimeline ()
+		{
+			PlayerPrefs.SetInt("LastLevel", CurrentLevel + 1);
 		}
 
 		public static void LoadLevel (int number)
 		{
+			CurrentLevel = number;
 			SceneManager.LoadScene("Level" + number);
+		}
+
+		public static void LoadLevelSelector ()
+		{
+			SceneManager.LoadScene("LevelSelector");
+			
 		}
 	}
 }

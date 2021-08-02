@@ -147,10 +147,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TimeToActivate: 1
-  TimeActive: 0.3
+  TimeActive: 0.2
   Size: 1
   tolerance: 0.05
-  finishingFadeTime: 0.2
+  finishingFadeTime: 0.3
   scoreDecay: 0.75
   thinCircle: {fileID: 2338424560414820492}
   thickCircle: {fileID: 2338424560825286796}
@@ -159,6 +159,9 @@ MonoBehaviour:
   originalColor: {r: 1, g: 1, b: 1, a: 1}
   successColor: {r: 0.30980393, g: 1, b: 0.30588236, a: 1}
   failColor: {r: 1, g: 0.30980393, b: 0.30980393, a: 1}
+  blockFadingOnMisclick: 0
+  waitForClick: 0
+  blinkRedTime: 0.2
 --- !u!1 &2338424560825286798
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,5 +1,5 @@
 using DG.Tweening;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,11 +7,15 @@ namespace Kalkatos.Cycles
 {
 	public class TutorialManager : MonoBehaviour
 	{
-		public static bool Finished { get { return PlayerPrefs.GetInt("TutorialFinished", 0) == 1; } }
+		public static bool Finished => PlayerPrefs.GetInt("TutorialFinished", 0) == 1;
 
-		[SerializeField] private CanvasGroup tutorial;
-		[SerializeField] private CanvasGroup headphonesMessage;
-		
+		[SerializeField] private int assistedCircles = 3;
+		[SerializeField] private float timeForHelper = 5;
+		[SerializeField] private GameObject helper;
+
+		private int currentCircle;
+		private CircleSpawner circleSpawner;
+		private float lastCircleSpawnTime;
 
 		private void Awake ()
 		{
@@ -20,25 +24,50 @@ namespace Kalkatos.Cycles
 				gameObject.SetActive(false);
 				return;
 			}
-			else
+
+			helper.SetActive(false);
+
+			CircleView.OnScored += CircleClicked;
+			CircleSpawner.OnCircleSpawned += CircleSpawned;
+
+			circleSpawner = FindObjectOfType<CircleSpawner>();
+		}
+
+		private void Update ()
+		{
+			if (!helper.activeSelf && !circleSpawner.SpawnNewCircles && Time.time - lastCircleSpawnTime >= timeForHelper)
 			{
-				tutorial.alpha = 1f;
-				headphonesMessage.alpha = 0;
-				headphonesMessage.gameObject.SetActive(true);
-				Sequence sequence = DOTween.Sequence();
-				sequence.AppendInterval(1f);
-				sequence.Append(DOTween.To(() => headphonesMessage.alpha, (float x) => headphonesMessage.alpha = x, 1f, 1.5f));
-				sequence.AppendInterval(2f);
-				sequence.Append(DOTween.To(() => headphonesMessage.alpha, (float x) => headphonesMessage.alpha = x, 0f, 1.5f));
-				sequence.Append(DOTween.To(() => tutorial.alpha, (float x) => tutorial.alpha = x, 0f, 2f));
-				sequence.Play().OnComplete(EndHeadphonesMessage);
+				helper.SetActive(true);
 			}
 		}
 
-		private void EndHeadphonesMessage ()
+		private void OnDestroy ()
 		{
-			headphonesMessage.gameObject.SetActive(false);
-			PlayerPrefs.SetInt("TutorialFinished", 1);
+			CircleView.OnScored -= CircleClicked;
+			CircleSpawner.OnCircleSpawned -= CircleSpawned;
+		}
+
+		private void CircleSpawned (CircleView circle)
+		{
+			circleSpawner.SpawnNewCircles = false;
+			lastCircleSpawnTime = Time.time;
+		}
+
+		private void CircleClicked (float obj)
+		{
+			currentCircle++;
+			circleSpawner.SpawnNewCircles = true;
+			helper.SetActive(false);
+			if (currentCircle >= assistedCircles)
+				EndTutorial();
+		}
+
+		private void EndTutorial ()
+		{
+			//PlayerPrefs.SetInt("TutorialFinished", 1);
+			CircleView.OnScored -= CircleClicked;
+			CircleSpawner.OnCircleSpawned -= CircleSpawned;
+			circleSpawner.SpawnNewCircles = true;
 			gameObject.SetActive(false);
 		}
 	}

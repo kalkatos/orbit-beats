@@ -13,8 +13,9 @@ namespace Kalkatos.Cycles
 	{
 		public Vector2 Position;
 		public CircleDefinitionNames PrefabName;
+		public bool OverrideDefaults = false;
 		public float TimeToActivate = 1f;
-		public float TimeActive = 0.5f;
+		public float TimeActive = 0.3f;
 		public float Size = 1f;
 
 		public PropertyName id => $"{PrefabName}@{Position.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}";

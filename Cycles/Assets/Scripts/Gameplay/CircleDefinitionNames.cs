@@ -3,5 +3,6 @@
 	public enum CircleDefinitionNames
 	{
 		CircleTimed,
+		CircleTutorial,
 	}
 }

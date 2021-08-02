@@ -28,18 +28,31 @@ namespace Kalkatos.Cycles
 		[SerializeField] private Color originalColor;
 		[SerializeField] private Color successColor;
 		[SerializeField] private Color failColor;
+		[Header("For tutorial")]
+		[SerializeField] private bool blockFadingOnMisclick;
+		[SerializeField] private bool waitForClick;
+		[SerializeField] private float blinkRedTime;
 
+		private string initializationId = "initialization";
+		private string pulsatingId = "pulsating";
+		private string misclickId = "misclick";
+		private string activationId = "activation";
 		private Material thickMaterial;
 		private int activationState;
 		private float activeStartTime;
 		private float startTime;
 		private bool fading;
+		private Color currentStateColor;
 
 		private void Awake ()
 		{
 			thickMaterial = new Material(thickCircle.material);
 			thickCircle.material = thickMaterial;
-		}
+			initializationId += gameObject.GetInstanceID();
+			pulsatingId += gameObject.GetInstanceID();
+			misclickId += gameObject.GetInstanceID();
+			activationId += gameObject.GetInstanceID();
+	}
 
 		private void OnEnable ()
 		{
@@ -49,10 +62,15 @@ namespace Kalkatos.Cycles
 			thinCircle.raycastTarget = true;
 			fading = false;
 			thickCircle.fillAmount = 0f;
-			int instanceId = gameObject.GetInstanceID();
-			thinCircle.DOColor(originalColor, TimeToActivate).SetId(instanceId);
-			thickCircle.DOColor(originalColor, TimeToActivate).SetId(instanceId);
-			thickCircle.DOFillAmount(1f, TimeToActivate).OnComplete(Activate).SetId(instanceId).SetEase(Ease.Linear);
+			//thinCircle.DOColor(currentStateColor, TimeToActivate).SetId(initializationId);
+			//thickCircle.DOColor(currentStateColor, TimeToActivate).SetId(initializationId);
+			DOTween.ToAlpha(() => currentStateColor, (Color c) =>
+			{
+				currentStateColor = c;
+				thinCircle.color = currentStateColor;
+				thickCircle.color = currentStateColor;
+			}, 1f, TimeToActivate).SetId(initializationId);
+			thickCircle.DOFillAmount(1f, TimeToActivate).OnComplete(Activate).SetId(initializationId).SetEase(Ease.Linear);
 			startTime = Time.time;
 		}
 
@@ -60,6 +78,7 @@ namespace Kalkatos.Cycles
 		{
 			Color fadedColor = originalColor;
 			fadedColor.a = 0;
+			currentStateColor = originalColor;
 			thinCircle.color = fadedColor;
 			thickCircle.color = fadedColor;
 			thickMaterial.SetVector(emissionColor, originalColor * originalEmissionIntensity);
@@ -69,43 +88,59 @@ namespace Kalkatos.Cycles
 		{
 			activationState = 1;
 			activeStartTime = Time.time;
-			StartCoroutine(DoAfterTime(TimeActive, Finish));
+			DOTween.Sequence().AppendInterval(TimeActive).OnComplete(Finish).SetId(activationId);
+			//StartCoroutine(DoAfterTime(TimeActive, Finish));
 		}
 
 		private void Finish ()
 		{
-			activationState = 2;
-			Fade(true);
+			if (waitForClick)
+				transform.DOPunchScale(Vector3.one * 0.1f, 0.5f, 1, 1).SetLoops(-1).SetId(pulsatingId);
+			else
+			{
+				activationState = 2;
+				Fade(true);
+			}
 		}
 
 		private void Fade (bool hideThinCircle)
 		{
 			fading = true;
+			thinCircle.color = currentStateColor;
+			thickCircle.color = currentStateColor;
 			if (hideThinCircle)
 			{
 				Color fadedColor = originalColor;
-				fadedColor.a = 0.01f;
+				fadedColor.a = 0;
 				thinCircle.color = fadedColor;
 			}
-			else
-				thinCircle.CrossFadeAlpha(0, finishingFadeTime, false);
-			thickCircle.CrossFadeAlpha(0, finishingFadeTime, false);
+			DOTween.ToAlpha(() => currentStateColor, (Color c) =>
+			{
+				currentStateColor = c;
+				thinCircle.color = currentStateColor;
+				thickCircle.color = currentStateColor;
+			}, 0.01f, finishingFadeTime).OnComplete(() => gameObject.SetActive(false));
 			DOTween.To(() => thickMaterial.GetVector(emissionColor).w, (float x) => thickMaterial.SetVector(emissionColor, originalColor * x), 1f, finishingFadeTime).SetEase(Ease.InCubic);
-			StartCoroutine(DoAfterTime(finishingFadeTime, () => gameObject.SetActive(false)));
-		}
-
-		private IEnumerator DoAfterTime (float time, Action callback)
-		{
-			yield return new WaitForSeconds(time);
-			callback?.Invoke();
 		}
 
 		private void Misclick ()
 		{
-			thinCircle.raycastTarget = false;
-			thinCircle.color = failColor;
-			thickCircle.color = failColor;
-			Fade(false);
+			SetOnlyHue(failColor);
+			if (!blockFadingOnMisclick)
+			{
+				thinCircle.raycastTarget = false;
+				Fade(false);
+			}
+			else
+			{
+				Color tweeningColor = failColor;
+				DOTween.To(() => tweeningColor, (Color c) => {
+					tweeningColor = c;
+					SetOnlyHue(c);
+				}, originalColor, blinkRedTime).SetId(misclickId);
+				//thinCircle.DOColor(originalColor, 0.2f).SetId(misclickId);
+				//thickCircle.DOColor(originalColor, 0.2f).SetId(misclickId);
+			}
 			OnScored?.Invoke(0);
 		}
 
@@ -113,7 +148,7 @@ namespace Kalkatos.Cycles
 		{
 			thinCircle.raycastTarget = false;
 			thickCircle.fillAmount = 1f;
-			thickCircle.color = successColor;
+			SetOnlyHue(successColor);
 			float score;
 			if (activationState > 0)
 			{
@@ -131,9 +166,20 @@ namespace Kalkatos.Cycles
 			Debug.Log("Score: " + (score * 100).ToString("0.00"));
 		}
 
+		private void SetOnlyHue (Color color)
+		{
+			currentStateColor.r = color.r;
+			currentStateColor.g = color.g;
+			currentStateColor.b = color.b;
+		}
+
 		public void OnClick ()
 		{
-			DOTween.Kill(gameObject.GetInstanceID());
+			DOTween.Kill(activationId);
+			DOTween.Kill(misclickId);
+			DOTween.Kill(pulsatingId);
+			if (!blockFadingOnMisclick)
+				DOTween.Kill(initializationId);
 			if (activationState > 0 || TimeToActivate - (Time.time - startTime) < tolerance)
 				SuccessClick();
 			else

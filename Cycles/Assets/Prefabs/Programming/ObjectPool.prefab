@@ -50,3 +50,8 @@ MonoBehaviour:
     qty: 25
     isCanvasObject: 1
     instantiations: 0
+  - id: 1
+    go: {fileID: 6818819592320571404, guid: d053c179237e4344da229ece6c095252, type: 3}
+    qty: 10
+    isCanvasObject: 1
+    instantiations: 0

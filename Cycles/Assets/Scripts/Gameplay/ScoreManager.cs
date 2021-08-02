@@ -19,12 +19,14 @@ namespace Kalkatos.Cycles
 
         private double currentScore;
 		private List<double> currentLeaderboard = new List<double>();
+		private string currentSceneName = "";
 
 		private void Awake ()
 		{
 			Instance = this;
 			CircleView.OnScored += Scored;
 			LevelManager.OnTimelineEnded += TimelineEnded;
+			currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
 		}
 
 		private void Start ()
@@ -51,7 +53,7 @@ namespace Kalkatos.Cycles
 		private void LoadLeaderboard ()
 		{
 			currentLeaderboard.Clear();
-			string savedLeaderboard = PlayerPrefs.GetString("Leaderboard", "");
+			string savedLeaderboard = PlayerPrefs.GetString(currentSceneName + "Leaderboard", "");
 			if (!string.IsNullOrEmpty(savedLeaderboard))
 			{
 				string[] leaderboardBreakdown = savedLeaderboard.Split('|');
@@ -79,7 +81,7 @@ namespace Kalkatos.Cycles
 						newLeaderboard += "|";
 					newLeaderboard += currentLeaderboard[i].ToString();
 				}
-				PlayerPrefs.SetString("Leaderboard", newLeaderboard);
+				PlayerPrefs.SetString(currentSceneName + "Leaderboard", newLeaderboard);
 			}
 
 			OnScoreWrapUp?.Invoke(currentScore, scorePosition);

@@ -550,7 +550,7 @@ MonoBehaviour:
   OverrideDefaults: 1
   TimeToActivate: 3
   TimeActive: 0.5
-  Size: 3
+  Size: 2
 --- !u!114 &-8387947915136864338
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -9454,7 +9454,7 @@ MonoBehaviour:
   OverrideDefaults: 1
   TimeToActivate: 3
   TimeActive: 0.5
-  Size: 3
+  Size: 2
 --- !u!114 &4166636002209930237
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -9554,7 +9554,7 @@ MonoBehaviour:
   OverrideDefaults: 1
   TimeToActivate: 3
   TimeActive: 0.5
-  Size: 3
+  Size: 2
 --- !u!114 &4278527714735729162
 MonoBehaviour:
   m_ObjectHideFlags: 1

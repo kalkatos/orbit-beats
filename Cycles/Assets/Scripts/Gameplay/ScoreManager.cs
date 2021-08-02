@@ -34,8 +34,8 @@ namespace Kalkatos.Cycles
 			LoadLeaderboard();
 			if (currentLeaderboard.Count == 0)
 				for (int i = maxLeaderboardEntries - 1; i >= 0; i--)
-					currentLeaderboard.Add(i + 1);
-					//currentLeaderboard.Add(Math.Round(UnityEngine.Random.Range(i * 10 * (float)scoreMultiplier, (i + 1) * 10 * (float)scoreMultiplier)));
+					//currentLeaderboard.Add(i + 1);
+					currentLeaderboard.Add(Math.Round(UnityEngine.Random.Range(i * 10 * (float)scoreMultiplier, (i + 1) * 10 * (float)scoreMultiplier)));
 		}
 
 		private void OnDestroy ()

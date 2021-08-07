@@ -3782,9 +3782,9 @@ MonoBehaviour:
   m_Time: 252.8
   Position: {x: 0.5030229, y: 0.51995164}
   PrefabName: 0
-  OverrideDefaults: 0
+  OverrideDefaults: 1
   TimeToActivate: 1
-  TimeActive: 0.5
+  TimeActive: 0.3
   Size: 3
 --- !u!114 &-188099107931618714
 MonoBehaviour:
